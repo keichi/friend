@@ -99,6 +99,21 @@ func (api *Api) GetUser(w rest.ResponseWriter, r *rest.Request) {
 }
 
 func (api *Api) DeleteUser(w rest.ResponseWriter, r *rest.Request) {
+	name := r.PathParam("name")
+	token := r.Header.Get("X-Friend-Session-Token")
+	user := User{}
+
+	if api.DB.Where("name = ?", name).First(&user).RecordNotFound() {
+		rest.Error(w, "User not found", 400)
+		return
+	} else {
+		if api.AuthenticateUser(name, token) {
+			api.DB.Where("user_id = ?", user.Id).Delete(&Session{})
+			api.DB.Where("name = ?", name).Delete(&User{})
+		} else {
+			rest.Error(w, "Session token is not valid", 400)
+		}
+	}
 }
 
 func GetPasswordHash(name string, password string) (hash []byte) {
