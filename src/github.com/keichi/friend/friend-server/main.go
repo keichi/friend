@@ -179,4 +179,8 @@ func (api *Api) AuthenticateUser(name string, token string) (succeeded bool) {
 }
 
 func (api *Api) LogoutUser(w rest.ResponseWriter, r *rest.Request) {
+	token := r.Header.Get("X-Friend-Session-Token")
+	if err := api.DB.Where("token = ?", token).Delete(Session{}).Error; err != nil {
+		rest.Error(w, "Session token is not valid", 500)
+	}
 }
