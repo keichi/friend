@@ -82,6 +82,20 @@ func (api *Api) InitSchema() {
 }
 
 func (api *Api) GetUser(w rest.ResponseWriter, r *rest.Request) {
+	name := r.PathParam("name")
+	token := r.Header.Get("X-Friend-Session-Token")
+	user := User{}
+	if err := api.DB.Where("name = ?", name).First(&user).Error; err != nil {
+		rest.Error(w, "User does not exist", 500)
+		return
+	}
+
+	user.Password = ""
+	if api.AuthenticateUser(name, token) {
+		api.DB.Model(&user).Related(&user.Sessions)
+	}
+
+	w.WriteJson(&user)
 }
 
 func (api *Api) DeleteUser(w rest.ResponseWriter, r *rest.Request) {
