@@ -86,7 +86,7 @@ func (api *Api) GetUser(w rest.ResponseWriter, r *rest.Request) {
 	token := r.Header.Get("X-Friend-Session-Token")
 	user := User{}
 	if api.DB.Where("name = ?", name).First(&user).RecordNotFound() {
-		rest.Error(w, "User does not exist", 400)
+		rest.Error(w, "User not found", 400)
 		return
 	}
 
@@ -180,6 +180,7 @@ func (api *Api) LoginUser(w rest.ResponseWriter, r *rest.Request) {
 
 	dbUser.Sessions = append(dbUser.Sessions, session)
 	api.DB.Save(&dbUser)
+	w.WriteJson(&session)
 }
 
 func (api *Api) AuthenticateUser(name string, token string) (succeeded bool) {
