@@ -85,7 +85,7 @@ func (api *Api) GetUser(w rest.ResponseWriter, r *rest.Request) {
 	name := r.PathParam("name")
 	token := r.Header.Get("X-Friend-Session-Token")
 	user := User{}
-	if err := api.DB.Where("name = ?", name).First(&user).Error; err != nil {
+	if api.DB.Where("name = ?", name).First(&user).RecordNotFound() {
 		rest.Error(w, "User does not exist", 500)
 		return
 	}
@@ -128,7 +128,7 @@ func (api *Api) CreateUser(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	if err := api.DB.Where("name = ?", user.Name).First(&user).Error; err != nil {
+	if api.DB.Where("name = ?", user.Name).First(&user).RecordNotFound() {
 		user.Id = 0
 		hash := GetPasswordHash(user.Name, user.Password)
 		user.Password = hex.EncodeToString(hash)
@@ -157,7 +157,7 @@ func (api *Api) LoginUser(w rest.ResponseWriter, r *rest.Request) {
 	}
 
 	dbUser := User{}
-	if err := api.DB.Where("name = ?", user.Name).First(&dbUser).Error; err != nil {
+	if api.DB.Where("name = ?", user.Name).First(&dbUser).RecordNotFound() {
 		rest.Error(w, "User not found", 500)
 		return
 	}
@@ -187,14 +187,12 @@ func (api *Api) AuthenticateUser(name string, token string) (succeeded bool) {
 	session := Session{}
 
 	api.DB.Where("name = ?", name).First(&user)
-	err := api.DB.Where("user_id = ? and token = ?", user.Id, token).First(&session).Error
-
-	return err == nil
+	return !api.DB.Where("user_id = ? and token = ?", user.Id, token).First(&session).RecordNotFound()
 }
 
 func (api *Api) LogoutUser(w rest.ResponseWriter, r *rest.Request) {
 	token := r.Header.Get("X-Friend-Session-Token")
-	if err := api.DB.Where("token = ?", token).Delete(Session{}).Error; err != nil {
+	if api.DB.Where("token = ?", token).Delete(Session{}).RecordNotFound() {
 		rest.Error(w, "Session token is not valid", 500)
 	}
 }
