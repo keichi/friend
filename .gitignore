@@ -7,6 +7,7 @@
 # Folders
 _obj
 _test
+bin/
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -22,6 +23,7 @@ _testmain.go
 
 *.exe
 *.test
+*.db
 
 ### OSX ###
 .DS_Store
