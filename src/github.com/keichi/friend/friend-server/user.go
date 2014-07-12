@@ -45,11 +45,11 @@ func (api *Api) DeleteUser(w rest.ResponseWriter, r *rest.Request) {
 	}
 }
 
-func GetPasswordHash(name string, password string) (hash []byte) {
+func (api *Api) GetPasswordHash(name string, password string) (hash []byte) {
 	hasher := sha256.New()
 	hash = []byte{}
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < api.Config.HashStretchCount; i++ {
 		hasher.Write(hash)
 		hasher.Write([]byte(name))
 		hasher.Write([]byte(password))
@@ -67,14 +67,14 @@ func (api *Api) CreateUser(w rest.ResponseWriter, r *rest.Request) {
 		rest.Error(w, "Username is empty", 400)
 		return
 	}
-	if len(strings.TrimSpace(user.Password)) <= 8 {
+	if len(strings.TrimSpace(user.Password)) <= api.Config.PasswordMinLength {
 		rest.Error(w, "Password is too short", 400)
 		return
 	}
 
 	if api.DB.Where("name = ?", user.Name).First(&user).RecordNotFound() {
 		user.Id = 0
-		hash := GetPasswordHash(user.Name, user.Password)
+		hash := api.GetPasswordHash(user.Name, user.Password)
 		user.Password = hex.EncodeToString(hash)
 
 		api.DB.Save(&user)
@@ -106,12 +106,12 @@ func (api *Api) LoginUser(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	if dbUser.Password != hex.EncodeToString(GetPasswordHash(user.Name, user.Password)) {
+	if dbUser.Password != hex.EncodeToString(api.GetPasswordHash(user.Name, user.Password)) {
 		rest.Error(w, "Password is wrong", 400)
 		return
 	}
 
-	buf := make([]byte, 32)
+	buf := make([]byte, api.Config.SessionKeyLength)
 	if _, err := rand.Read(buf); err != nil {
 		rest.Error(w, "Failed to generate session key", 500)
 		return
@@ -119,7 +119,7 @@ func (api *Api) LoginUser(w rest.ResponseWriter, r *rest.Request) {
 	token := hex.EncodeToString(buf)
 	session := Session{
 		Token:   token,
-		Expires: time.Now().AddDate(0, 0, 30),
+		Expires: time.Now().AddDate(0, 0, api.Config.SessionExpiration),
 	}
 
 	dbUser.Sessions = append(dbUser.Sessions, session)

@@ -1,15 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/ant0ine/go-json-rest/rest"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 	api := Api{}
+	api.LoadConfig()
 	api.InitDB()
 	api.InitSchema()
 
@@ -30,8 +33,33 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", &handler))
 }
 
+type Config struct {
+	PasswordMinLength int
+	HashStretchCount  int
+	SessionKeyLength  int
+	SessionExpiration int
+}
+
 type Api struct {
-	DB gorm.DB
+	DB     gorm.DB
+	Config Config
+}
+
+func (api *Api) LoadConfig() {
+	api.Config = Config{
+		PasswordMinLength: 8,
+		HashStretchCount:  1024,
+		SessionKeyLength:  32,
+		SessionExpiration: 30,
+	}
+
+	file, err := os.Open("conf.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err = json.NewDecoder(file).Decode(&api.Config); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (api *Api) InitDB() {

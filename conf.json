@@ -1,0 +1,7 @@
+{
+    "PasswordMinLength":    8,
+    "HashStretchCount":     1024,
+    "SessionKeyLength":     32,
+    "SessionExpiration":    30
+}
+
