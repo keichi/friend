@@ -86,7 +86,7 @@ func (api *Api) GetUser(w rest.ResponseWriter, r *rest.Request) {
 	token := r.Header.Get("X-Friend-Session-Token")
 	user := User{}
 	if api.DB.Where("name = ?", name).First(&user).RecordNotFound() {
-		rest.Error(w, "User does not exist", 500)
+		rest.Error(w, "User does not exist", 400)
 		return
 	}
 
@@ -120,11 +120,11 @@ func (api *Api) CreateUser(w rest.ResponseWriter, r *rest.Request) {
 	r.DecodeJsonPayload(&user)
 
 	if strings.TrimSpace(user.Name) == "" {
-		rest.Error(w, "Username is empty", 500)
+		rest.Error(w, "Username is empty", 400)
 		return
 	}
 	if len(strings.TrimSpace(user.Password)) <= 8 {
-		rest.Error(w, "Password is too short", 500)
+		rest.Error(w, "Password is too short", 400)
 		return
 	}
 
@@ -140,7 +140,7 @@ func (api *Api) CreateUser(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	rest.Error(w, "User with the same name already exists", 500)
+	rest.Error(w, "User with the same name already exists", 400)
 }
 
 func (api *Api) LoginUser(w rest.ResponseWriter, r *rest.Request) {
@@ -148,22 +148,22 @@ func (api *Api) LoginUser(w rest.ResponseWriter, r *rest.Request) {
 	r.DecodeJsonPayload(&user)
 
 	if strings.TrimSpace(user.Name) == "" {
-		rest.Error(w, "Username is empty", 500)
+		rest.Error(w, "Username is empty", 400)
 		return
 	}
 	if strings.TrimSpace(user.Password) == "" {
-		rest.Error(w, "Password is empty", 500)
+		rest.Error(w, "Password is empty", 400)
 		return
 	}
 
 	dbUser := User{}
 	if api.DB.Where("name = ?", user.Name).First(&dbUser).RecordNotFound() {
-		rest.Error(w, "User not found", 500)
+		rest.Error(w, "User not found", 400)
 		return
 	}
 
 	if dbUser.Password != hex.EncodeToString(GetPasswordHash(user.Name, user.Password)) {
-		rest.Error(w, "Password is wrong", 500)
+		rest.Error(w, "Password is wrong", 400)
 		return
 	}
 
@@ -193,6 +193,6 @@ func (api *Api) AuthenticateUser(name string, token string) (succeeded bool) {
 func (api *Api) LogoutUser(w rest.ResponseWriter, r *rest.Request) {
 	token := r.Header.Get("X-Friend-Session-Token")
 	if api.DB.Where("token = ?", token).Delete(Session{}).RecordNotFound() {
-		rest.Error(w, "Session token is not valid", 500)
+		rest.Error(w, "Session token is not valid", 400)
 	}
 }
