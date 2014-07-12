@@ -27,7 +27,7 @@ func main() {
 		rest.RouteObjectMethod("POST", "/users", &api, "CreateUser"),
 		rest.RouteObjectMethod("DELETE", "/users/:name", &api, "DeleteUser"),
 		rest.RouteObjectMethod("POST", "/login", &api, "LoginUser"),
-		rest.RouteObjectMethod("GET", "/logout", &api, "LogoutUser"),
+		rest.RouteObjectMethod("POST", "/logout", &api, "LogoutUser"),
 	)
 	if err != nil {
 		log.Fatal(err)
