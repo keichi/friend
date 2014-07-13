@@ -30,3 +30,16 @@ type Session struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type Transfer struct {
+	Id            int64 `primaryKey:"yes"`
+	Token         string
+	Sender        User
+	Receiver      User
+	FileName      string
+	FileSize      int
+	SenderReady   bool
+	ReceiverReady bool
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
