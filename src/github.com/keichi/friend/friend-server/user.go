@@ -124,6 +124,7 @@ func (api *Api) LoginUser(w rest.ResponseWriter, r *rest.Request) {
 
 	dbUser.Sessions = append(dbUser.Sessions, session)
 	api.DB.Save(&dbUser)
+	api.DB.Save(&session)
 	w.WriteJson(&session)
 }
 
