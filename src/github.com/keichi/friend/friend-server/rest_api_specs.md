@@ -1,5 +1,7 @@
 # friend-server REST API specs
 
+All requests/responses must be performed over a HTTPS connection.
+
 ## Create user
 
 ```
