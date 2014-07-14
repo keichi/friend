@@ -2,6 +2,15 @@
     "PasswordMinLength":    8,
     "HashStretchCount":     1024,
     "SessionKeyLength":     32,
-    "SessionExpiration":    30
+    "SessionExpiration":    30,
+    "ProhibitedNames":		[
+    	"signup",
+    	"login",
+    	"send",
+    	"recv",
+    	"logout",
+    	"root",
+    	"admin",
+    	"administrator"
+    ]
 }
-

@@ -38,6 +38,7 @@ type Config struct {
 	HashStretchCount  int
 	SessionKeyLength  int
 	SessionExpiration int
+	ProhibitedNames   []string
 }
 
 type Api struct {
@@ -51,6 +52,7 @@ func (api *Api) LoadConfig() {
 		HashStretchCount:  1024,
 		SessionKeyLength:  32,
 		SessionExpiration: 30,
+		ProhibitedNames:   []string{},
 	}
 
 	file, err := os.Open("conf.json")

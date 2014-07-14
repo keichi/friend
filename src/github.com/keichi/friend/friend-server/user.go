@@ -63,6 +63,12 @@ func (api *Api) CreateUser(w rest.ResponseWriter, r *rest.Request) {
 	user := User{}
 	r.DecodeJsonPayload(&user)
 
+	for _, name := range api.Config.ProhibitedNames {
+		if user.Name == name {
+			rest.Error(w, "Invalid user name", 400)
+			return
+		}
+	}
 	if strings.TrimSpace(user.Name) == "" {
 		rest.Error(w, "Username is empty", 400)
 		return
