@@ -141,15 +141,14 @@ func (api *Api) AuthenticateUser(name string, token string) (succeeded bool) {
 
 	api.DB.Where("name = ?", name).First(&user)
 	if api.DB.Where("user_id = ? and token = ?", user.Id, token).First(&session).RecordNotFound() {
-		succeeded = false
+		return false
 	}
 	if time.Now().After(session.Expires) {
-		succeeded = false
 		api.DB.Delete(&session)
+		return false
 	}
 
-	succeeded = true
-	return
+	return true
 }
 
 func (api *Api) LogoutUser(w rest.ResponseWriter, r *rest.Request) {
