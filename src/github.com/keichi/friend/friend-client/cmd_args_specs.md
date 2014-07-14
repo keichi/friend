@@ -1,29 +1,29 @@
 # friend-client command line specs
 
-```friend signup```
+`friend signup`
 
 Create account on server.
 
-```friend login```
+`friend login`
 
 Login to server.
 
-```friend <user>```
+`friend <user>`
 
 Reads stdin and send to `user`.
 
-```friend <user> <filename>```
+`friend <user> <filename>`
 
 Send `filename` to `user`.
 
-```friend```
+`friend`
 
 Wait for incoming file and write out to stdout.
 
-```friend -o <filename>```
+`friend -o <filename>`
 
 Wait for incoming file and save to `filename`.
 
-```friend -d```
+`friend -d`
 
 Launch as daemon and automatically download files in background.
