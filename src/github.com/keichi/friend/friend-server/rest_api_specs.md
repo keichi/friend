@@ -9,6 +9,8 @@ POST /users
 ```
 
 Request body must be `application/json` and include `name`, `password` and `publickey`.
+Password will be hashed and stored in the database so that its raw value cannot
+be restored. 
 
 ```
 {
