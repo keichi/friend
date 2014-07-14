@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"github.com/ant0ine/go-json-rest/rest"
+	"github.com/keichi/friend/common"
 	_ "github.com/mattn/go-sqlite3"
 	"strings"
 	"time"
@@ -13,7 +14,7 @@ import (
 func (api *Api) GetUser(w rest.ResponseWriter, r *rest.Request) {
 	name := r.PathParam("name")
 	token := r.Header.Get("X-Friend-Session-Token")
-	user := User{}
+	user := common.User{}
 	if api.DB.Where("name = ?", name).First(&user).RecordNotFound() {
 		rest.Error(w, "User not found", 400)
 		return
@@ -30,15 +31,15 @@ func (api *Api) GetUser(w rest.ResponseWriter, r *rest.Request) {
 func (api *Api) DeleteUser(w rest.ResponseWriter, r *rest.Request) {
 	name := r.PathParam("name")
 	token := r.Header.Get("X-Friend-Session-Token")
-	user := User{}
+	user := common.User{}
 
 	if api.DB.Where("name = ?", name).First(&user).RecordNotFound() {
 		rest.Error(w, "User not found", 400)
 		return
 	} else {
 		if api.AuthenticateUser(name, token) {
-			api.DB.Where("user_id = ?", user.Id).Delete(&Session{})
-			api.DB.Where("name = ?", name).Delete(&User{})
+			api.DB.Where("user_id = ?", user.Id).Delete(&common.Session{})
+			api.DB.Where("name = ?", name).Delete(&common.User{})
 		} else {
 			rest.Error(w, "Session token is not valid", 400)
 		}
@@ -60,7 +61,7 @@ func (api *Api) GetPasswordHash(name string, password string) (hash []byte) {
 }
 
 func (api *Api) CreateUser(w rest.ResponseWriter, r *rest.Request) {
-	user := User{}
+	user := common.User{}
 	r.DecodeJsonPayload(&user)
 
 	for _, name := range api.Config.ProhibitedNames {
@@ -94,7 +95,7 @@ func (api *Api) CreateUser(w rest.ResponseWriter, r *rest.Request) {
 }
 
 func (api *Api) LoginUser(w rest.ResponseWriter, r *rest.Request) {
-	user := User{}
+	user := common.User{}
 	r.DecodeJsonPayload(&user)
 
 	if strings.TrimSpace(user.Name) == "" {
@@ -106,7 +107,7 @@ func (api *Api) LoginUser(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	dbUser := User{}
+	dbUser := common.User{}
 	if api.DB.Where("name = ?", user.Name).First(&dbUser).RecordNotFound() {
 		rest.Error(w, "User not found", 400)
 		return
@@ -123,7 +124,7 @@ func (api *Api) LoginUser(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 	token := hex.EncodeToString(buf)
-	session := Session{
+	session := common.Session{
 		Token:   token,
 		Expires: time.Now().AddDate(0, 0, api.Config.SessionExpiration),
 	}
@@ -135,8 +136,8 @@ func (api *Api) LoginUser(w rest.ResponseWriter, r *rest.Request) {
 }
 
 func (api *Api) AuthenticateUser(name string, token string) (succeeded bool) {
-	user := User{}
-	session := Session{}
+	user := common.User{}
+	session := common.Session{}
 
 	api.DB.Where("name = ?", name).First(&user)
 	if api.DB.Where("user_id = ? and token = ?", user.Id, token).First(&session).RecordNotFound() {
@@ -153,7 +154,7 @@ func (api *Api) AuthenticateUser(name string, token string) (succeeded bool) {
 
 func (api *Api) LogoutUser(w rest.ResponseWriter, r *rest.Request) {
 	token := r.Header.Get("X-Friend-Session-Token")
-	if api.DB.Where("token = ?", token).Delete(Session{}).RecordNotFound() {
+	if api.DB.Where("token = ?", token).Delete(&common.Session{}).RecordNotFound() {
 		rest.Error(w, "Session token is not valid", 400)
 	}
 }

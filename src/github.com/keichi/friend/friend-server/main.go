@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/ant0ine/go-json-rest/rest"
 	"github.com/jinzhu/gorm"
+	"github.com/keichi/friend/common"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
@@ -74,7 +75,7 @@ func (api *Api) InitDB() {
 }
 
 func (api *Api) InitSchema() {
-	api.DB.AutoMigrate(User{})
-	api.DB.AutoMigrate(TrustRelation{})
-	api.DB.AutoMigrate(Session{})
+	api.DB.AutoMigrate(common.User{})
+	api.DB.AutoMigrate(common.TrustRelation{})
+	api.DB.AutoMigrate(common.Session{})
 }

@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"time"
@@ -38,6 +38,8 @@ type Transfer struct {
 	Receiver      User
 	FileName      string
 	FileSize      int
+	PieceSize     int
+	PieceHash     []byte
 	SenderReady   bool
 	ReceiverReady bool
 	CreatedAt     time.Time
