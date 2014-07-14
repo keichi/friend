@@ -133,7 +133,16 @@ func (api *Api) AuthenticateUser(name string, token string) (succeeded bool) {
 	session := Session{}
 
 	api.DB.Where("name = ?", name).First(&user)
-	return !api.DB.Where("user_id = ? and token = ?", user.Id, token).First(&session).RecordNotFound()
+	if api.DB.Where("user_id = ? and token = ?", user.Id, token).First(&session).RecordNotFound() {
+		succeeded = false
+	}
+	if time.Now().After(session.Expires) {
+		succeeded = false
+		api.DB.Delete(&session)
+	}
+
+	succeeded = true
+	return
 }
 
 func (api *Api) LogoutUser(w rest.ResponseWriter, r *rest.Request) {
