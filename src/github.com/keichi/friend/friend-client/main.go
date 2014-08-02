@@ -18,13 +18,17 @@ func main() {
 }
 
 func createUserPrompt() {
-	// if alreadyUser {
-	// 	confirm
-	// }
-
 	// scan
 	var name, password string
 	s := bufio.NewScanner(os.Stdin)
+
+	if _, err := os.Stat(getHomePath() + "/.friend/user.json"); !os.IsNotExist(err) {
+		fmt.Print("Already user data exists. Create new user? [y/N]: ")
+		s.Scan()
+		if s.Text() != "y" {
+			return
+		}
+	}
 
 	fmt.Print("New User's Name: ")
 	s.Scan()
