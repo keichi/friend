@@ -9,6 +9,7 @@ import (
 	"github.com/keichi/friend/common"
 	"net/http"
 	"os"
+	osuser "os/user"
 	"strings"
 )
 
@@ -39,7 +40,7 @@ func createUserPrompt() {
 		return
 	}
 
-	// StoreUser(user)
+	StoreUser(user)
 }
 
 func CreateUser(name, password string) (*common.User, error) {
@@ -73,4 +74,26 @@ func CreateUser(name, password string) (*common.User, error) {
 	}
 
 	return user, nil
+}
+
+func StoreUser(user *common.User) {
+	if err := os.MkdirAll(getHomePath()+"/.friend", 0700); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+	file, err := os.OpenFile(getHomePath()+"/.friend/user.json", os.O_CREATE|os.O_WRONLY, 0600)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	if err = json.NewEncoder(file).Encode(user); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+}
+
+func getHomePath() string {
+	user, err := osuser.Current()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+	return user.HomeDir
 }
